@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json())
-app.use(cookieParser()); // 쿠키 파서 미들웨어 추가
+app.use(cookieParser());
 app.use(globalErrorHandler);
 app.use(route)
 
