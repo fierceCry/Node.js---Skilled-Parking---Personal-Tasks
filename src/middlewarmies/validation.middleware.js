@@ -83,9 +83,18 @@ const resumerUpdateSchema = Joi.object({
   'object.or': '수정할 정보를 입력해 주세요.'
 });
 
+const resumerLogSchema = Joi.object({
+  status: Joi.string().required()
+    .error(new Error('변경하고자 하는 지원 상태를 입력해 주세요.')),
+
+  reason: Joi.string().required()
+    .error(new Error('지원 상태 변경 사유를 입력해 주세요.'))
+});
+
 export { 
   userCreateSchema, 
   userLoginSchema, 
   resumerCreatesSchema,
-  resumerUpdateSchema
+  resumerUpdateSchema,
+  resumerLogSchema
 };

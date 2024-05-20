@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.util.js';
-import { SECRET_KEY, AUTH_MESSAGES } from '../constants/auth.constant.js';
+import { SECRET_KEY } from '../constants/env.constant.js';
+import { AUTH_MESSAGES } from '../constants/user.constant.js';
+import { catchAsync } from './error-handler.middleware.js';
 
 /** 엑세스 토큰 검증 API **/
-const authMiddleware = async (req, res, next) => {
-  try {
+const authMiddleware = catchAsync(async (req, res, next) => {
     const accessToken = req.cookies.authToken;
     console.log(accessToken)
     if (!accessToken || !accessToken.startsWith('Bearer ')) {
@@ -23,16 +24,10 @@ const authMiddleware = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ errorMessage: AUTH_MESSAGES.USER_NOT_FOUND });
     }
-
     req.user = user;
     next();
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ errorMessage: '서버 에러가 발생했습니다.' });
-  }
-};
+});
 
-// Token을 검증하고 Payload를 반환합니다.
 const validateToken = async (token, secretKey) => {
   try {
     const payload = jwt.verify(token, secretKey);
@@ -42,4 +37,4 @@ const validateToken = async (token, secretKey) => {
   }
 }
 
-export { authMiddleware };
+export { authMiddleware, validateToken };

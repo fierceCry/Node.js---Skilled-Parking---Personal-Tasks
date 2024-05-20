@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,25 +7,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  nickname  String
-  role      Role     @default(APPLICANT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  resumes   Resume[]
+  id            Int         @id @default(autoincrement())
+  email         String      @unique
+  password      String
+  nickname      String
+  role          Role        @default(APPLICANT)
+  refreshToken  String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  resumes       Resume[]
+  recruiterLogs ResumeLog[] @relation("Recruiter")
 }
 
 model Resume {
-  id             Int      @id @default(autoincrement())
+  id             Int         @id @default(autoincrement())
   userId         Int
   title          String
   content        String
-  support_status String   @default("APPLY")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id])
+  supportStatus  String      @default("APPLY")
+  supportReason  String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           User        @relation(fields: [userId], references: [id])
+  resumeLogs     ResumeLog[]
+}
+
+model ResumeLog {
+  id               Int       @id @default(autoincrement())
+  resumeId         Int
+  recruiterId      Int
+  oldSupportStatus String
+  newSupportStatus String
+  reason           String
+  createdAt        DateTime @default(now())
+  resume           Resume   @relation(fields: [resumeId], references: [id])
+  recruiter        User     @relation("Recruiter", fields: [recruiterId], references: [id])
 }
 
 enum Role {
