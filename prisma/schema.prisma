@@ -12,15 +12,26 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  nickname      String
+  nickname  String
   role      Role     @default(APPLICANT)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  resumes   Resume[]
+}
+
+model Resume {
+  id             Int      @id @default(autoincrement())
+  userId         Int
+  title          String
+  content        String
+  support_status String   @default("APPLY")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
 }
 
 enum Role {

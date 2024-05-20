@@ -1,28 +1,27 @@
 import jwt from 'jsonwebtoken';
-import { prisma } from '../utils/prisma.util.js'; // Prisma client import
+import { prisma } from '../utils/prisma.util.js';
+import { SECRET_KEY, AUTH_MESSAGES } from '../constants/auth.constant.js';
 
 /** 엑세스 토큰 검증 API **/
 const authMiddleware = async (req, res, next) => {
   try {
-    console.log(req.cookies)
     const accessToken = req.cookies.authToken;
+    console.log(accessToken)
     if (!accessToken || !accessToken.startsWith('Bearer ')) {
-      return res.status(400).json({ errorMessage: '인증 정보가 없습니다.' });
+      return res.status(400).json({ errorMessage: AUTH_MESSAGES.NO_AUTH_INFO });
     }
 
     const token = accessToken.split(' ')[1];
 
-    const payload = await validateToken(token, process.env.SECRET_KEY);
+    const payload = await validateToken(token, SECRET_KEY);
     if (!payload) {
-      return res.status(401).json({ errorMessage: 'Access Token이 유효하지 않습니다.' });
+      return res.status(401).json({ errorMessage: AUTH_MESSAGES.INVALID_AUTH });
     }
-
     const user = await prisma.user.findUnique({
-      where: { id: payload.id }
+      where: { id: payload.userId }
     });
-
     if (!user) {
-      return res.status(404).json({ errorMessage: '인증 정보와 일치하는 사용자가 없습니다.' });
+      return res.status(404).json({ errorMessage: AUTH_MESSAGES.USER_NOT_FOUND });
     }
 
     req.user = user;
