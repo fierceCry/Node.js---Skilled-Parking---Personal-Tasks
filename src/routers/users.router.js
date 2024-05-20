@@ -18,6 +18,7 @@ userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
     });
 }));
 
+
 userRouter.get('/logout', refreshTokenMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
   console.log(id)
