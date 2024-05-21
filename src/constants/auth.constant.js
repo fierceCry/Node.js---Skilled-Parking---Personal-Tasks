@@ -1,5 +1,3 @@
-// auth.constant.js
-
 // 인증 관련 메시지
 export const AUTH_MESSAGES = {
   DUPLICATE_EMAIL: '이미 가입된 사용자입니다.',
