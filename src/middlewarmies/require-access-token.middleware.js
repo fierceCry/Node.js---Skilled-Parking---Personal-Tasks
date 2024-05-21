@@ -14,12 +14,12 @@ const authMiddleware = catchAsync(async (req, res, next) => {
 
     const token = accessToken.split(' ')[1];
     const payload = await validateToken(token, ENV_KEY.SECRET_KEY);
-
+    console.log(payload)
     if(!payload) {
       return res.status(401).json({ errorMessage: AUTH_MESSAGES.TOKEN_EXPIRED});
     }
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId }
+      where: { id: payload.id }
     });
     if (!user) {
       return res.status(404).json({ errorMessage: AUTH_MESSAGES.USER_NOT_FOUND });
