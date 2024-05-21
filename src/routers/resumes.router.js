@@ -28,7 +28,7 @@ resumesRouter.post('/post', authMiddleware, catchAsync(async (req, res) => {
 resumesRouter.get('/list/get', authMiddleware, catchAsync(async (req, res) => {
   const { id, role } = req.user;
   let { sortBy, order, status } = req.query;
-  
+
   sortBy = sortBy || 'createdAt';
   order = order === 'asc' ? 'asc' : 'desc';
   let whereClause;
@@ -75,12 +75,9 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
     where: { id: parseInt(resumeId) }
   });
 
-  // 이력서가 존재하지 않는 경우 404 상태 코드와 메시지를 반환
   if (!result) {
     return res.status(404).json({ message: RESUME_MESSAGES.RESUME_NOT_FOUND });
   }
-
-  // APPLICANT인 경우 이력서 작성자와 현재 사용자의 ID가 일치하지 않으면 403 상태 코드와 메시지를 반환
   if (role === 'APPLICANT' && result.userId !== id) {
     return res.status(403).json({ message: RESUME_MESSAGES.ACCESS_DENIED });
   }
@@ -112,6 +109,7 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
 }));
 
 resumesRouter.patch('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
+  console.log(req.user)
   const { id } = req.user;
   const { resumeId } = req.params;
   const data = req.body;
@@ -183,26 +181,24 @@ resumesRouter.patch('/resume/:resumeId/status', authMiddleware, requireRoles(['R
   if (!resume) {
     return res.status(404).json({ message: '이력서가 존재하지 않습니다.' });
   }
-
   const result = await prisma.$transaction(async (prisma) => {
     // 이력서 정보 업데이트
     await prisma.resume.update({
       where: { id: parseInt(resumeId) },
-      data: { supportStatus: data.status },
+      data: { support_status: data.resumeStatus },
     });
 
     // 채용 담당자 정보 조회
     const recruiter = await prisma.user.findUnique({
       where: { id: userId },
     });
-
     // 이력서 로그 생성
     const resumeLog = await prisma.resumeLog.create({
       data: {
         resume: { connect: { id: parseInt(resumeId) } },
         recruiter: { connect: { id: recruiter.id } },
-        oldSupportStatus: resume.supportStatus,
-        newSupportStatus: data.status,
+        oldSupport_status: resume.support_status,
+        newSupport_status: data.resumeStatus,
         reason: data.reason,
       },
     });
@@ -219,21 +215,21 @@ resumesRouter.get('/get/log/:resumeId', authMiddleware, catchAsync(async (req, r
 
   const data = await prisma.resumeLog.findMany({
     orderBy: {
-      createdAt: 'desc', // 생성일시 기준으로 최신순으로 정렬
+      createdAt: 'desc',
     },
     where: {
       resumeId: parseInt(resumeId) // 이력서 ID로 필터링
     },
     select: {
-      id: true, // 이력서 로그 ID
-      resumeId: true, // 이력서 ID
-      oldSupportStatus: true, // 예전 상태
-      newSupportStatus: true, // 새로운 상태
-      reason: true, // 사유
-      createdAt: true, // 생성일시
+      id: true, 
+      resumeId: true, 
+      oldSupport_status: true,
+      newSupport_status: true,
+      reason: true,
+      createdAt: true,
       recruiter: {
         select: {
-          nickname: true // 채용 담당자 이름
+          nickname: true
         }
       }
     }
