@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import { globalErrorHandler } from './src/middlewarmies/error-handler.middleware.js';
-import { prisma } from './src/utils/prisma.util.js';
 import route from './src/routers/index.js';
 import cookieParser from 'cookie-parser';
 import LogMiddleware from './src/middlewarmies/log.middleware.js';
@@ -21,6 +20,5 @@ app.get('/api', async (req, res) => {
 })
 
 app.listen(ENV_KEY.PORT, async()=>{
-  await prisma.$connect();
   console.log(ENV_KEY.PORT, '포트로 서버가 열렸습니다!');
 })
