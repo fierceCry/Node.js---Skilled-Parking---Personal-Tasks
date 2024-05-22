@@ -15,8 +15,8 @@ userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
       email: user.email,
       nickname: user.nickname,
       role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
     });
 }));
 
