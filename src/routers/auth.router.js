@@ -59,7 +59,7 @@ authRouter.post('/sign-in', catchAsync(async (req, res) => {
       ENV_KEY.REFRESH_SECRET_KEY,
       { expiresIn: ENV_KEY.REFRESH_TOKEN_EXPIRATION_TIME }
     );
-  
+    console.log(refreshToken)
     // DB에 리프레시 토큰 저장
     await prisma.user.update({
       where: { id: userData.id },

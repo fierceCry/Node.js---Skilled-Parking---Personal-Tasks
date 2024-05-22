@@ -6,42 +6,43 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id            Int         @id @default(autoincrement())
-  email         String      @unique
-  password      String
-  nickname      String
-  role          Role        @default(APPLICANT)
+  id             Int         @id @default(autoincrement())
+  email          String      @unique
+  password       String
+  nickname       String
+  role           Role        @default(APPLICANT)
   refresh_token  String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  resumes       Resume[]
-  recruiterLogs ResumeLog[] @relation("Recruiter")
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  resumes        Resume[]
+  recruiter_logs ResumeLog[] @relation("Recruiter")
 }
 
 model Resume {
   id             Int         @id @default(autoincrement())
-  userId         Int
+  user_id        Int
   title          String
   content        String
-  support_status  String      @default("APPLY")
-  support_reason  String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  user           User        @relation(fields: [userId], references: [id])
-  resumeLogs     ResumeLog[]
+  support_status String      @default("APPLY")
+  support_reason String?
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  user           User        @relation(fields: [user_id], references: [id])
+  resume_logs    ResumeLog[]
 }
 
 model ResumeLog {
-  id               Int       @id @default(autoincrement())
-  resumeId         Int
-  recruiterId      Int
-  oldSupport_status String
-  newSupport_status String
-  reason           String
-  createdAt        DateTime @default(now())
-  resume           Resume   @relation(fields: [resumeId], references: [id])
-  recruiter        User     @relation("Recruiter", fields: [recruiterId], references: [id])
+  id                 Int       @id @default(autoincrement())
+  resume_id          Int
+  recruiter_id       Int
+  old_support_status String
+  new_support_status String
+  reason             String
+  created_at         DateTime  @default(now())
+  resume             Resume    @relation(fields: [resume_id], references: [id])
+  recruiter          User      @relation("Recruiter", fields: [recruiter_id], references: [id])
 }
 
 enum Role {

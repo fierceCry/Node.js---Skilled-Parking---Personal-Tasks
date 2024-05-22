@@ -58,8 +58,8 @@ resumesRouter.get('/list/get', authMiddleware, catchAsync(async (req, res) => {
       title: true,
       content: true,
       support_status: true,
-      createdAt: true,
-      updatedAt: true,
+      created_at: true,
+      updated_at: true,
     },
   });
 
@@ -101,8 +101,8 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
     title: resume.title,
     content: resume.content,
     support_status: resume.support_status,
-    createdAt: resume.createdAt,
-    updatedAt: resume.updatedAt,
+    created_at: resume.created_at,
+    updated_at: resume.updated_at,
   }));
 
   return res.status(200).json({ data: transformedData });

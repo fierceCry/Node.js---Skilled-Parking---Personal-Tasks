@@ -8,7 +8,6 @@ import { validateToken } from './require-access-token.middleware.js';
 const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
   // 헤더에서 리프래시 토큰을 가져옴
   const refreshToken = req.headers.authorization;
-  console.log(req.headers)
 
   if (!refreshToken) {
     return res
@@ -17,7 +16,7 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
   }
   const token = refreshToken.split(' ')[1];
   // 리프래시 토큰 검증
-  const payload = validateToken(token, ENV_KEY.REFRESH_SECRET_KEY);
+  const payload = await validateToken(token, ENV_KEY.REFRESH_SECRET_KEY);
   if (!payload) {
     return res
       .status(401)
@@ -31,8 +30,8 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
   });
   if (!data)
     return res.status(400).json({ errorMessage: AUTH_MESSAGES.TOKEN_END });
-
-  // 사용자 조회
+  
+  // 사용자 조회  
   const user = await prisma.user.findUnique({
     where: { id: payload.id },
   });
