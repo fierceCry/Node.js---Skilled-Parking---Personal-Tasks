@@ -2,7 +2,7 @@ import express from 'express';
 import { authMiddleware } from '../middlewarmies/require-access-token.middleware.js';
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';
 import { resumerCreatesSchema } from '../middlewarmies/validation.middleware.js';
-import { prisma } from '../utils/prisma.util.js';
+import prisma from '../utils/prisma.util.js';
 import { resumerUpdateSchema, resumerLogSchema } from '../middlewarmies/validation.middleware.js';
 import { RESUME_MESSAGES } from '../constants/resume.constant.js';
 import { requireRoles } from '../middlewarmies/require-roles.middleware.js';

@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import { userCreateSchema, userLoginSchema } from '../middlewarmies/validation.middleware.js';
-import { prisma } from "../utils/prisma.util.js";
+import prisma from "../utils/prisma.util.js";
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';
 import { AUTH_MESSAGES } from '../constants/auth.constant.js';
 import { ENV_KEY } from '../constants/env.constant.js';
