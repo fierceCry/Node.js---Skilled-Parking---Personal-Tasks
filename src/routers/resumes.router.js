@@ -14,10 +14,9 @@ resumesRouter.post('/post', authMiddleware, catchAsync(async (req, res) => {
   const resumerData = req.body;
   const { error } = resumerCreatesSchema.validate(resumerData);
   if (error) return res.status(400).json({ message: error.message });
-
   const result = await prisma.resume.create({
     data: {
-      userId: id,
+      user_id: id,
       title: resumerData.title,
       content: resumerData.content,
     },
@@ -78,7 +77,7 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
   if (!result) {
     return res.status(404).json({ message: RESUME_MESSAGES.RESUME_NOT_FOUND });
   }
-  if (role === 'APPLICANT' && result.userId !== id) {
+  if (role === 'APPLICANT' && result.user_id !== id) {
     return res.status(403).json({ message: RESUME_MESSAGES.ACCESS_DENIED });
   }
 
@@ -109,7 +108,6 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
 }));
 
 resumesRouter.patch('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
-  console.log(req.user)
   const { id } = req.user;
   const { resumeId } = req.params;
   const data = req.body;
@@ -121,7 +119,7 @@ resumesRouter.patch('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
   const existingResume = await prisma.resume.findUnique({
     where: {
         id: parseInt(resumeId),
-        userId: id
+        user_id: id
       }
   });
   
@@ -150,7 +148,7 @@ resumesRouter.delete('/:deleteId', authMiddleware, catchAsync(async(req, res)=>{
   const data = await prisma.resume.findFirst({
     where: {
       id: parseInt(deleteId),
-      userId : id
+      user_id : id
     }
   })
   if(!data) return res.status(400).json({ message: RESUME_MESSAGES.RESUME_NOT_FOUND})

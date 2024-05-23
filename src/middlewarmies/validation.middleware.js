@@ -35,6 +35,12 @@ const userCreateSchema = Joi.object({
     .messages({
       'any.required': '이름을 입력해 주세요.'
     }),
+  
+  role: Joi.string()
+    .optional()
+    .messages({
+      'string.base': '역할은 문자열이어야 합니다.'
+    })
 });
 
 //유저 로그인 joi

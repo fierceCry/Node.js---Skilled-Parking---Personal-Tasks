@@ -14,7 +14,6 @@ const authRouter = express.Router();
 // 회원가입 라우트
 authRouter.post('/sign-up', catchAsync(async (req, res) => {
   const createData = req.body;
-
   const { error } = userCreateSchema.validate(createData);
   if (error) return res.status(400).json({ message: error.message });
 
@@ -26,7 +25,8 @@ authRouter.post('/sign-up', catchAsync(async (req, res) => {
     data: {
       email: createData.email,
       password: hashPassword,
-      nickname: createData.nickName
+      nickname: createData.nickName,
+      role: createData.role
     }
   });
 
@@ -59,16 +59,16 @@ authRouter.post('/sign-in', catchAsync(async (req, res) => {
       ENV_KEY.REFRESH_SECRET_KEY,
       { expiresIn: ENV_KEY.REFRESH_TOKEN_EXPIRATION_TIME }
     );
-    console.log(refreshToken)
     // DB에 리프레시 토큰 저장
-    await prisma.user.update({
-      where: { id: userData.id },
+    await prisma.refreshToken.create({
       data: {
+        user_id: userData.id,
         refresh_token: refreshToken
       }
     });
 
-  return res.status(200).json({ accessToken, refreshToken});
+    res.cookie('authorization', `Bearer ${accessToken}`);
+    return res.status(200).json({ accessToken, refreshToken});
 }));
 
 export default authRouter;
