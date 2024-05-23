@@ -13,11 +13,11 @@ model User {
   password       String
   nickname       String
   role           Role        @default(APPLICANT)
-  refresh_token  String?
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
   resumes        Resume[]
   recruiter_logs ResumeLog[] @relation("Recruiter")
+  refresh_tokens RefreshToken[]
 }
 
 model Resume {
@@ -41,8 +41,18 @@ model ResumeLog {
   new_support_status String
   reason             String
   created_at         DateTime  @default(now())
+  updated_at         DateTime    @updatedAt
   resume             Resume    @relation(fields: [resume_id], references: [id])
   recruiter          User      @relation("Recruiter", fields: [recruiter_id], references: [id])
+}
+
+model RefreshToken {
+  id             Int       @id @default(autoincrement())
+  refresh_token  String
+  user_id        Int
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  user           User      @relation(fields: [user_id], references: [id])
 }
 
 enum Role {
