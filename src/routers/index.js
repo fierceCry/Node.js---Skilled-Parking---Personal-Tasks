@@ -5,8 +5,8 @@ import resumesRouter from './resumes.router.js';
 
 const route = express.Router();
 
-route.use('/users', userRouter);
 route.use('/auth', authRouter);
 route.use('/resumes', resumesRouter)
+route.use('/users', userRouter);
 
 export default route;
