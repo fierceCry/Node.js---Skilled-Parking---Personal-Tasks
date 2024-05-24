@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-// 유저 생성 joi
+/** 유저 회원가입 joi **/
 const userCreateSchema = Joi.object({
   email: Joi.string()
     .email({ tlds: { allow: false } }) // 이메일 형식을 확인
@@ -43,7 +43,7 @@ const userCreateSchema = Joi.object({
     })
 });
 
-//유저 로그인 joi
+/** 유저 로그인 joi **/
 const userLoginSchema = Joi.object({
   email: Joi.string()
     .email({ tlds: { allow: false } }) // 이메일 형식을 확인
@@ -64,7 +64,7 @@ const userLoginSchema = Joi.object({
     })
 });
 
-// 이력서 생성 joi
+/** 이력서 생성 joi **/
 const resumerCreatesSchema = Joi.object({
   title: Joi.string()
     .required()
@@ -83,7 +83,7 @@ const resumerCreatesSchema = Joi.object({
     })
 });
 
-// 이력서 업데이트 joi
+/** 이력서 업데이트 joi **/
 const resumerUpdateSchema = Joi.object({
   title: Joi.string()
   .required()    
@@ -104,6 +104,7 @@ const resumerUpdateSchema = Joi.object({
   'object.or': '수정할 정보를 입력해 주세요.'
 });
 
+/** 이력서 로그 생성 joi **/
 const resumerLogSchema = Joi.object({
   resumeStatus: Joi.string()
   .required()

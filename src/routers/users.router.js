@@ -1,13 +1,14 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
+import prisma from '../utils/prisma.util.js';
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';
 import { authMiddleware } from '../middlewarmies/require-access-token.middleware.js';
-import prisma from '../utils/prisma.util.js';
 import { refreshTokenMiddleware } from '../middlewarmies/require-refresh-token.middleware.js';
 import { ENV_KEY } from '../constants/env.constant.js';
-import jwt from 'jsonwebtoken';
 
 const userRouter = express.Router();
 
+/** 사용자 정보 조회 API **/
 userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
     const user = req.user;
     res.status(200).json({
@@ -20,6 +21,7 @@ userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
     });
 }));
 
+/** 사용자 RefreshToken 토큰 재발급 API **/
 userRouter.get('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
   const { id, role } = req.user;
 
@@ -30,7 +32,9 @@ userRouter.get('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
      ENV_KEY.SECRET_KEY,
     { expiresIn: ENV_KEY.JWT_EXPIRATION_TIME }
   );
-
+  const tokenRecord = await prisma.refreshToken.findFirst({
+    where: { user_id: id }
+  });
     // RefreshToken 생성
     const refreshToken = jwt.sign(
       { id: id, role: role },
@@ -39,21 +43,30 @@ userRouter.get('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
     );
   
     // DB에 리프레시 토큰 저장
-    await prisma.user.update({
-      where: { id: id },
+    await prisma.refreshToken.update({
+      where: { id: tokenRecord.id },
       data: {
         refresh_token: refreshToken
-      }
+      }});
+    // 토큰 생성하여 다시 cookie로 전달
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
     });
     return  res.status(200).json({ accessToken, refreshToken})
 }))
 
+/**  사용자 로그아웃 API **/
 userRouter.get('/logout', authMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
-  const updatedUser = await prisma.user.update({
-    where: { id },
-    // refreshToken 필드를 null로 설정하여 업데이트
-    data: { refresh_token: null } 
+
+  const tokenRecord = await prisma.refreshToken.findFirst({
+    where: { user_id: id }
+  });
+
+  const updatedUser = await prisma.refreshToken.delete({
+    where: { id: tokenRecord.id },
   });
 
   return res.status(200).json({ data : updatedUser.id});

@@ -9,11 +9,14 @@ import { requireRoles } from '../middlewarmies/require-roles.middleware.js';
 
 const resumesRouter = express.Router();
 
+/** 이력서 생성 API **/
 resumesRouter.post('/post', authMiddleware, catchAsync(async (req, res) => {
   const { id } = req.user;
   const resumerData = req.body;
   const { error } = resumerCreatesSchema.validate(resumerData);
   if (error) return res.status(400).json({ message: error.message });
+  
+  // 이력서 생성
   const result = await prisma.resume.create({
     data: {
       user_id: id,
@@ -24,26 +27,18 @@ resumesRouter.post('/post', authMiddleware, catchAsync(async (req, res) => {
   return res.status(200).json({ data: result });
 }));
 
+/** 이력서 목록 조회 API **/
 resumesRouter.get('/list/get', authMiddleware, catchAsync(async (req, res) => {
   const { id, role } = req.user;
-  let { sortBy, order, status } = req.query;
+  let { sortBy = 'created_at', order = 'desc', status } = req.query;
 
-  sortBy = sortBy || 'createdAt';
+  // 기본적으로 'desc'로 설정
   order = order === 'asc' ? 'asc' : 'desc';
-  let whereClause;
-  
-  if (role === 'RECRUITER') {
-    // 채용 담당자인 경우
-    whereClause = {};
-    if (status) {
-      whereClause.support_status = status;
-    }
-  } else {
-    // 지원자인 경우
-    whereClause = { userId: id };
-    if (status) {
-      whereClause.support_status = status;
-    }
+
+  // whereClause 설정
+  const whereClause = role === 'RECRUITER' ? {} : { user_id: id };
+  if (status) {
+    whereClause.support_status = status;
   }
 
   const data = await prisma.resume.findMany({
@@ -62,9 +57,10 @@ resumesRouter.get('/list/get', authMiddleware, catchAsync(async (req, res) => {
     },
   });
 
-  return res.status(200).json({ data: data });
+  return res.status(200).json({ data });
 }));
 
+/** 이력서 상세 조회 API **/
 resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) => {
   const { id, role } = req.user;
   const { resumeId } = req.params;
@@ -93,24 +89,14 @@ resumesRouter.get('/get/:resumeId', authMiddleware, catchAsync(async (req, res) 
     }
   });
 
-  // 데이터 변환
-  const transformedData = data.map(resume => ({
-    id: resume.id,
-    nickname: resume.user.nickname,
-    title: resume.title,
-    content: resume.content,
-    support_status: resume.support_status,
-    created_at: resume.created_at,
-    updated_at: resume.updated_at,
-  }));
-
-  return res.status(200).json({ data: transformedData });
+  return res.status(200).json({ data: data });
 }));
 
+/** 이력서 수정 API **/
 resumesRouter.patch('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
+  const data = req.body;
   const { id } = req.user;
   const { resumeId } = req.params;
-  const data = req.body;
 
   const { error } = resumerUpdateSchema.validate(data)
   if (error) return res.status(400).json({ message: error.message });
@@ -140,7 +126,7 @@ resumesRouter.patch('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
   return res.status(200).json({ data: updatedResume });
 }));
 
-
+/** 이력서 삭제 API **/
 resumesRouter.delete('/:deleteId', authMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
   const { deleteId } = req.params;
@@ -162,10 +148,11 @@ resumesRouter.delete('/:deleteId', authMiddleware, catchAsync(async(req, res)=>{
   return res.status(200).json({ data: deletedResume.id})
 }));
 
+/** 이력서 지원자 이력서 수정 & 로그 생성 API **/
 resumesRouter.patch('/resume/:resumeId/status', authMiddleware, requireRoles(['RECRUITER']), catchAsync(async (req, res) => {
   const userId = req.user.id;
-  const { resumeId } = req.params;
   const data = req.body;
+  const { resumeId } = req.params;
   // 이력서 변경 로그의 유효성을 검사합니다.
   const { error } = resumerLogSchema.validate(data);
   if (error) {
@@ -195,8 +182,8 @@ resumesRouter.patch('/resume/:resumeId/status', authMiddleware, requireRoles(['R
       data: {
         resume: { connect: { id: parseInt(resumeId) } },
         recruiter: { connect: { id: recruiter.id } },
-        oldSupport_status: resume.support_status,
-        newSupport_status: data.resumeStatus,
+        old_support_status: resume.support_status,
+        new_upport_status: data.resumeStatus,
         reason: data.reason,
       },
     });
@@ -208,23 +195,23 @@ resumesRouter.patch('/resume/:resumeId/status', authMiddleware, requireRoles(['R
   return res.status(200).json({ data: result });
 }));
 
+/** 이력서 로그 조회 API **/
 resumesRouter.get('/get/log/:resumeId', authMiddleware, catchAsync(async (req, res) => {
   const { resumeId } = req.params;
-
   const data = await prisma.resumeLog.findMany({
     orderBy: {
-      createdAt: 'desc',
+      created_at: 'desc',
     },
     where: {
-      resumeId: parseInt(resumeId) // 이력서 ID로 필터링
+      resume_id: parseInt(resumeId) // 이력서 ID로 필터링
     },
     select: {
       id: true, 
-      resumeId: true, 
-      oldSupport_status: true,
-      newSupport_status: true,
+      resume_id: true, 
+      old_support_status: true,
+      new_support_status: true,
       reason: true,
-      createdAt: true,
+      created_at: true,
       recruiter: {
         select: {
           nickname: true

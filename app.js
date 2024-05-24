@@ -1,18 +1,26 @@
 import express from 'express';
-import dotenv from 'dotenv';
-import { globalErrorHandler } from './src/middlewarmies/error-handler.middleware.js';
-import route from './src/routers/index.js';
 import cookieParser from 'cookie-parser';
-import LogMiddleware from './src/middlewarmies/log.middleware.js';
+import logMiddleware from './src/middlewarmies/log.middleware.js';
+import route from './src/routers/index.js';
+import session from 'express-session';
+import { globalErrorHandler } from './src/middlewarmies/error-handler.middleware.js';
 import { ENV_KEY } from './src/constants/env.constant.js';
-dotenv.config();
 
 const app = express();
 
-app.use(LogMiddleware)
+app.use(logMiddleware)
 app.use(express.json())
 app.use(cookieParser());
 app.use(globalErrorHandler);
+app.use(session({
+  secret: ENV_KEY.DMAIN_URL,
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'strict'
+  }
+}));
 app.use(route)
 
 app.get('/api', async (req, res) => {
