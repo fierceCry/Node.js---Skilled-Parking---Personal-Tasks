@@ -22,7 +22,7 @@ userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
 }));
 
 /** 사용자 RefreshToken 토큰 재발급 API **/
-userRouter.get('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
+userRouter.post('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
   const { id, role } = req.user;
 
   const accessToken = jwt.sign(
