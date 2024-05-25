@@ -16,13 +16,13 @@ userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
       email: user.email,
       nickname: user.nickname,
       role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
     });
 }));
 
 /** 사용자 RefreshToken 토큰 재발급 API **/
-userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req, res)=>{
+userRouter.post('/token', refreshTokenMiddleware, catchAsync(async( req, res)=>{
   const { id, role } = req.user;
 
   const accessToken = jwt.sign(
@@ -46,8 +46,14 @@ userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req,
     await prisma.refreshToken.update({
       where: { id: tokenRecord.id },
       data: {
-        refreshToken: refreshToken
+        refresh_token: refreshToken
       }});
+    // 토큰 생성하여 다시 cookie로 전달
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+    });
     return  res.status(200).json({ accessToken, refreshToken})
 }))
 
@@ -56,7 +62,7 @@ userRouter.get('/logout', authMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
 
   const tokenRecord = await prisma.refreshToken.findFirst({
-    where: { userId: id }
+    where: { user_id: id }
   });
 
   const updatedUser = await prisma.refreshToken.delete({
