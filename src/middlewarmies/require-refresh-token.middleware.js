@@ -1,4 +1,4 @@
-import prisma from '../utils/prisma.util.js';
+import { prisma } from '../utils/prisma.util.js';
 import { ENV_KEY } from '../constants/env.constant.js';
 import { AUTH_MESSAGES } from '../constants/user.constant.js';
 import { catchAsync } from './error-handler.middleware.js';
@@ -27,8 +27,8 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
 
   const tokenData = await prisma.refreshToken.findFirst({
     where: {
-      user_id: payload.id,
-      refresh_token: token
+      userId: payload.id,
+      refreshToken: token
     },
   });
   if (!tokenData){

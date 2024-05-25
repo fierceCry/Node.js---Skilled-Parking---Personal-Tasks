@@ -1,8 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import prisma from "../utils/prisma.util.js";
-import { userCreateSchema, userLoginSchema } from '../middlewarmies/validation.middleware.js';
+import { prisma } from "../utils/prisma.util.js";
+import { userCreateSchema } from  '../middlewarmies/validation/sign-up.validation.middlware.js';
+import { userLoginSchema } from '../middlewarmies/validation/sign-in.validateion.middlewar.js';
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';
 import { AUTH_MESSAGES } from '../constants/auth.constant.js';
 import { ENV_KEY } from '../constants/env.constant.js';
@@ -10,11 +11,9 @@ import { ENV_KEY } from '../constants/env.constant.js';
 const authRouter = express.Router();
 
 // 회원가입 라우트
-authRouter.post('/sign-up', catchAsync(async (req, res) => {
+authRouter.post('/sign-up', userCreateSchema, catchAsync(async (req, res) => {
   const createData = req.body;
-  const { error } = userCreateSchema.validate(createData);
-  if (error) return res.status(400).json({ message: error.message });
-
+  console.log(createData)
   // 유저 조회
   const userData = await prisma.user.findFirst({ 
     where: { 
@@ -27,7 +26,7 @@ authRouter.post('/sign-up', catchAsync(async (req, res) => {
 
   // 암호화
   const hashPassword = await bcrypt.hash(createData.password, parseInt( ENV_KEY.SECRET_KEY ));
-  const { refresh_token, password, ...result } = await prisma.user.create({
+  const { password, ...result } = await prisma.user.create({
     data: {
       email: createData.email,
       password: hashPassword,
@@ -35,17 +34,12 @@ authRouter.post('/sign-up', catchAsync(async (req, res) => {
       role: createData.role
     }
   });
-
   res.status(201).json({ data : result });
 }));
 
 // 로그인 라우트
-authRouter.post('/sign-in', catchAsync(async (req, res) => {
+authRouter.post('/sign-in', userLoginSchema, catchAsync(async (req, res) => {
     const data = req.body;
-    const { error } = userLoginSchema.validate(data);
-    if (error) {
-      return res.status(400).json({ message: error.message });
-    }
 
     // 유저 조회
     const userData = await prisma.user.findFirst({
@@ -83,15 +77,9 @@ authRouter.post('/sign-in', catchAsync(async (req, res) => {
     );
     await prisma.refreshToken.create({
       data: {
-        user_id: userData.id,
-        refresh_token: refreshToken,
+        userId: userData.id,
+        refreshToken: refreshToken,
       },
-    });
-
-    res.cookie('authorization', `Bearer ${accessToken}`, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Strict',
     });
     return res.status(200).json({ accessToken, refreshToken });
   })
