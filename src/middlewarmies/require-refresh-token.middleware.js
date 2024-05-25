@@ -27,8 +27,8 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
 
   const tokenData = await prisma.refreshToken.findFirst({
     where: {
-      userId: payload.id,
-      refreshToken: token
+      user_id: payload.id,
+      refresh_token: token
     },
   });
   if (!tokenData){
