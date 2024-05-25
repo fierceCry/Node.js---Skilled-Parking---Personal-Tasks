@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import prisma from '../utils/prisma.util.js';
+import { prisma } from '../utils/prisma.util.js';
 import { ENV_KEY } from '../constants/env.constant.js';
 import { AUTH_MESSAGES } from '../constants/user.constant.js';
 import { catchAsync } from './error-handler.middleware.js';

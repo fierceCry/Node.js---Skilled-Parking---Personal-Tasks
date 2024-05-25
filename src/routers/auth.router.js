@@ -1,7 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import prisma from "../utils/prisma.util.js";
+import { prisma } from "../utils/prisma.util.js";
 import { userCreateSchema } from  '../middlewarmies/validation/sign-up.validation.middlware.js';
 import { userLoginSchema } from '../middlewarmies/validation/sign-in.validateion.middlewar.js';
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';

@@ -1,5 +1,5 @@
 import express from 'express';
-import prisma from '../utils/prisma.util.js';
+import { prisma } from '../utils/prisma.util.js';
 import { authMiddleware } from '../middlewarmies/require-access-token.middleware.js';
 import { catchAsync } from '../middlewarmies/error-handler.middleware.js';
 import { resumerCreatesSchema } from '../middlewarmies/validation/resumeCreate.validation.middleware.js';
