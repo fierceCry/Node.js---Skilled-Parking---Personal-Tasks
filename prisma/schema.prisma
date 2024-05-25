@@ -9,50 +9,58 @@ datasource db {
 
 model User {
   id             Int         @id @default(autoincrement())
-  email          String      @unique
-  password       String
-  nickname       String
-  role           Role        @default(APPLICANT)
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
+  email          String      @unique @map("email")
+  password       String      @map("password")
+  nickname       String      @map("nickname")
+  role           Role        @default(APPLICANT) @map("role")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
   resumes        Resume[]
-  recruiter_logs ResumeLog[] @relation("Recruiter")
-  refresh_tokens RefreshToken[]
+  recruiterLogs  ResumeLog[] @relation("Recruiter")
+  refreshTokens  RefreshToken[]
+
+  @@map("User")
 }
 
 model Resume {
   id             Int         @id @default(autoincrement())
-  user_id        Int
-  title          String
-  content        String
-  support_status String      @default("APPLY")
-  support_reason String?
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
-  user           User        @relation(fields: [user_id], references: [id])
-  resume_logs    ResumeLog[]
+  userId         Int         @map("user_id")
+  title          String      @map("title")
+  content        String      @map("content")
+  supportStatus  String      @default("APPLY") @map("support_status")
+  supportReason  String?     @map("support_reason")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+  user           User        @relation(fields: [userId], references: [id])
+  resumeLogs     ResumeLog[]
+
+  @@map("Resume")
 }
 
 model ResumeLog {
   id                 Int       @id @default(autoincrement())
-  resume_id          Int
-  recruiter_id       Int
-  old_support_status String
-  new_support_status String
-  reason             String
-  created_at         DateTime  @default(now())
-  updated_at         DateTime    @updatedAt
-  resume             Resume    @relation(fields: [resume_id], references: [id])
-  recruiter          User      @relation("Recruiter", fields: [recruiter_id], references: [id])
+  resumeId           Int       @map("resume_id")
+  recruiterId        Int       @map("recruiter_id")
+  oldSupportStatus   String    @map("old_support_status")
+  newSupportStatus   String    @map("new_support_status")
+  reason             String    @map("reason")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+  resume             Resume    @relation(fields: [resumeId], references: [id])
+  recruiter          User      @relation("Recruiter", fields: [recruiterId], references: [id])
+
+  @@map("ResumeLog")
 }
 
 model RefreshToken {
   id             Int       @id @default(autoincrement())
-  refresh_token  String
-  user_id        Int
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  user           User      @relation(fields: [user_id], references: [id])
+  refreshToken   String    @map("refresh_token")
+  userId         Int       @map("user_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  user           User      @relation(fields: [userId], references: [id])
+
+  @@map("RefreshToken")
 }
 
 enum Role {
