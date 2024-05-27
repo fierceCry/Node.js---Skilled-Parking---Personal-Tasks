@@ -78,7 +78,7 @@ authRouter.post('/sign-in', userLoginSchema, catchAsync(async (req, res) => {
     await prisma.refreshToken.create({
       data: {
         userId: userData.id,
-        refreshToken: refreshToken,
+        refreshToken: refreshToken
       },
     });
     return res.status(200).json({ accessToken, refreshToken });

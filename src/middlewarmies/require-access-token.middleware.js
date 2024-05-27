@@ -28,7 +28,7 @@ const authMiddleware = catchAsync(async (req, res, next) => {
       where: { id: payload.id }
     });
     if (!user) {
-      return res.status(404).json({ message: AUTH_MESSAGES.USER_NOT_FOUND });
+      return res.status(404).json({ message: AUTH_MESSAGES.INVALID_AUTH });
     }
     req.user = user;
     next();
