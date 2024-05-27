@@ -33,7 +33,7 @@ userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req,
     { expiresIn: ENV_KEY.JWT_EXPIRATION_TIME }
   );
   const tokenRecord = await prisma.refreshToken.findFirst({
-    where: { user_id: id }
+    where: { userId: id }
   });
     // RefreshToken 생성
     const refreshToken = jwt.sign(

@@ -34,9 +34,9 @@ resumesRouter.get('/list', authMiddleware, catchAsync(async (req, res) => {
   order = order === 'asc' ? 'asc' : 'desc';
 
   // whereClause 설정
-  const whereClause = role === 'RECRUITER' ? {} : { user_id: id };
+  const whereClause = role === 'RECRUITER' ? {} : { userId: id };
   if (status) {
-    whereClause.support_status = status;
+    whereClause.supportStatus = status;
   }
 
   const data = await prisma.resume.findMany({
@@ -91,7 +91,7 @@ resumesRouter.get('/:resumeId/detail', authMiddleware, catchAsync(async (req, re
 }));
 
 /** 이력서 수정 API **/
-resumesRouter.patch('/:resumeId/update', authMiddleware, resumerUpdateSchema, catchAsync(async(req, res)=>{
+resumesRouter.patch('/:resumeId', authMiddleware, resumerUpdateSchema, catchAsync(async(req, res)=>{
   const data = req.body;
   const { id } = req.user;
   const { resumeId } = req.params;
@@ -131,6 +131,16 @@ resumesRouter.delete('/:deleteId/resume', authMiddleware, catchAsync(async(req, 
       userId : id
     }
   })
+
+  const logData = await prisma.resumeLog.findFirst({
+    where: {
+      resumeId: parseInt(deleteId)
+    }
+  })
+  if(logData){
+    return res.status(400).json({ message : RESUME_MESSAGES.RECRUITER_RESULT_PUBLISHED_DELETE_DENIED})
+  }
+
   if(!data) return res.status(400).json({ message: RESUME_MESSAGES.RESUME_NOT_FOUND})
 
     const deletedResume = await prisma.resume.delete({
@@ -138,6 +148,7 @@ resumesRouter.delete('/:deleteId/resume', authMiddleware, catchAsync(async(req, 
         id: parseInt(deleteId)
       }
     });
+
   
   return res.status(200).json({ data: deletedResume.id})
 }));
