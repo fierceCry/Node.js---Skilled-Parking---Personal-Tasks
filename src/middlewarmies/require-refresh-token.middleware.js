@@ -3,6 +3,7 @@ import { ENV_KEY } from '../constants/env.constant.js';
 import { AUTH_MESSAGES } from '../constants/user.constant.js';
 import { catchAsync } from './error-handler.middleware.js';
 import { validateToken } from './require-access-token.middleware.js';
+import bcrypt from 'bcrypt';
 
 /** RefreshToken 토큰 검증 및 재발급 미들웨어 **/
 const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
@@ -24,22 +25,24 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
   } else if(payload === 'JsonWebTokenError'){
     return res.status(401).json({ message: AUTH_MESSAGES.INVALID_AUTH});
   }
-
-  const tokenData = await prisma.refreshToken.findFirst({
+  const tokenData = await prisma.refreshToken.findUnique({
     where: {
-      userId: payload.id,
-      refreshToken: token
+      userId: payload.id
     },
   });
   if (!tokenData){
     return res.status(400).json({ message: AUTH_MESSAGES.TOKEN_END });
   }
-  // 사용자 조회  
-  const user = await prisma.user.findUnique({
-    where: { id: payload.id },
-  });
-  if (!user) {
-    return res.status(404).json({ message: AUTH_MESSAGES.USER_NOT_FOUND });
+  const isValid = await bcrypt.compare(token, tokenData.refreshToken);
+
+  if (!isValid) { 
+    return res.status(401).json({ message: AUTH_MESSAGES.TOKEN_END });
+  }
+  const user = await prisma.user.findFirst({
+    where: {id: payload.id}
+  })
+  if(!user){
+    return res.status(400).json({ message: AUTH_MESSAGES.USER_NOT_FOUND})
   }
   req.user = user;
   next();

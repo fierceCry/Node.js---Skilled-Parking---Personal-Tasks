@@ -13,7 +13,6 @@ const authRouter = express.Router();
 // 회원가입 라우트
 authRouter.post('/sign-up', userCreateSchema, catchAsync(async (req, res) => {
   const createData = req.body;
-  console.log(createData)
   // 유저 조회
   const userData = await prisma.user.findFirst({ 
     where: { 
@@ -25,13 +24,12 @@ authRouter.post('/sign-up', userCreateSchema, catchAsync(async (req, res) => {
   }
 
   // 암호화
-  const hashPassword = await bcrypt.hash(createData.password, parseInt( ENV_KEY.SECRET_KEY ));
-  const { password, ...result } = await prisma.user.create({
+  const hashPassword = await bcrypt.hash(createData.password, parseInt( ENV_KEY.SALT_ROUNDS ));
+  const { password: _, ...result } = await prisma.user.create({
     data: {
       email: createData.email,
       password: hashPassword,
-      nickname: createData.nickName,
-      role: createData.role
+      nickname: createData.nickName
     }
   });
   res.status(201).json({ data : result });
@@ -75,13 +73,13 @@ authRouter.post('/sign-in', userLoginSchema, catchAsync(async (req, res) => {
         expiresIn: ENV_KEY.REFRESH_TOKEN_EXPIRATION_TIME,
       }
     );
-    await prisma.refreshToken.create({
-      data: {
-        userId: userData.id,
-        refreshToken: refreshToken
-      },
+    const hashRefreshToken = await bcrypt.hash(refreshToken, parseInt(ENV_KEY.SALT_ROUNDS));
+    await prisma.refreshToken.upsert({
+      where: { userId: userData.id },
+      create: { userId: userData.id, refreshToken: hashRefreshToken },
+      update: { refreshToken: hashRefreshToken },
     });
-    return res.status(200).json({ accessToken, refreshToken });
+    return res.status(200).json({ data: {accessToken, refreshToken} });
   })
 );
 
