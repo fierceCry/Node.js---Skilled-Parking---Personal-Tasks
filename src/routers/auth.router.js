@@ -76,8 +76,8 @@ authRouter.post('/sign-in', userLoginSchema, catchAsync(async (req, res) => {
     const hashRefreshToken = await bcrypt.hash(refreshToken, parseInt(ENV_KEY.SALT_ROUNDS));
     await prisma.refreshToken.upsert({
       where: { userId: userData.id },
-      create: { userId: userData.id, refreshToken: hashRefreshToken },
       update: { refreshToken: hashRefreshToken },
+      create: { userId: userData.id, refreshToken: hashRefreshToken },
     });
     return res.status(200).json({ data: {accessToken, refreshToken} });
   })
