@@ -11,7 +11,7 @@ import { requireRoles } from '../middlewarmies/require-roles.middleware.js';
 const resumesRouter = express.Router();
 
 /** 이력서 생성 API **/
-resumesRouter.post('/create', authMiddleware, resumerCreatesSchema, catchAsync(async (req, res) => {
+resumesRouter.post('/', authMiddleware, resumerCreatesSchema, catchAsync(async (req, res) => {
   const { id } = req.user;
   const resumerData = req.body;
   // 이력서 생성
@@ -26,7 +26,7 @@ resumesRouter.post('/create', authMiddleware, resumerCreatesSchema, catchAsync(a
 }));
 
 /** 이력서 목록 조회 API **/
-resumesRouter.get('/list', authMiddleware, catchAsync(async (req, res) => {
+resumesRouter.get('/', authMiddleware, catchAsync(async (req, res) => {
   const { id, role } = req.user;
   let { sortBy = 'createdAt', order = 'desc', status } = req.query;
 
@@ -68,7 +68,7 @@ resumesRouter.get('/list', authMiddleware, catchAsync(async (req, res) => {
 }));
 
 /** 이력서 상세 조회 API **/
-resumesRouter.get('/:resumeId/detail', authMiddleware, catchAsync(async (req, res) => {
+resumesRouter.get('/:resumeId', authMiddleware, catchAsync(async (req, res) => {
   const { id, role } = req.user;
   const { resumeId } = req.params;
 
@@ -111,23 +111,22 @@ resumesRouter.get('/:resumeId/detail', authMiddleware, catchAsync(async (req, re
 resumesRouter.patch('/:resumeId', authMiddleware, resumerUpdateSchema, catchAsync(async(req, res)=>{
   const data = req.body;
   const { id } = req.user;
-  const { resumeId } = req.params;
+  const { resumeId } = Number(req.params);
   // 이력서 존재 여부 확인
-  const existingResume = await prisma.resume.findUnique({
+  const existingResume = await prisma.resume.findFirst({
     where: {
-        id: parseInt(resumeId),
+        id: resumeId,
         userId: id
       }
   });
-  
   if (!existingResume) {
     return res.status(404).json({ error: RESUME_MESSAGES.RESUME_NOT_FOUND });
   }
-
   // 데이터 업데이트
   const updatedResume = await prisma.resume.update({
     where: {
-      id: parseInt(resumeId)
+      id: existingResume.id,
+      userId: id
     },
     data: {
       ...(data.title && { title: data.title }),
@@ -138,7 +137,7 @@ resumesRouter.patch('/:resumeId', authMiddleware, resumerUpdateSchema, catchAsyn
 }));
 
 /** 이력서 삭제 API **/
-resumesRouter.delete('/:deleteId/resume', authMiddleware, catchAsync(async(req, res)=>{
+resumesRouter.delete('/:resumeId', authMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
   const { deleteId } = req.params;
 
@@ -171,7 +170,7 @@ resumesRouter.delete('/:deleteId/resume', authMiddleware, catchAsync(async(req, 
 }));
 
 /** 이력서 지원자 이력서 수정 & 로그 생성 API **/
-resumesRouter.patch('/:resumeId/status', authMiddleware, resumerLogSchema, requireRoles(['RECRUITER']), catchAsync(async (req, res) => {
+resumesRouter.patch('/:resumeId/logs', authMiddleware, resumerLogSchema, requireRoles(['RECRUITER']), catchAsync(async (req, res) => {
   const userId = req.user.id;
   const data = req.body;
   const { resumeId } = req.params;
@@ -212,8 +211,8 @@ resumesRouter.patch('/:resumeId/status', authMiddleware, resumerLogSchema, requi
   return res.status(200).json({ data: result });
 }));
 
-/** 이력서 로그 조회 API **/
-resumesRouter.get('/log/:resumeId', authMiddleware, requireRoles(['RECRUITER']), catchAsync(async (req, res) => {
+/** 이력서 로그 상세 조회 API **/
+resumesRouter.get('/:resumeId/status', authMiddleware, requireRoles(['RECRUITER']), catchAsync(async (req, res) => {
   const { resumeId } = req.params;
   const data = await prisma.resumeLog.findMany({
     orderBy: {

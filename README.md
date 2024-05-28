@@ -83,15 +83,15 @@
 
 #### 이력서 생성
 - **Method**: `POST`
-- **URL**: `/resumes/create`
+- **URL**: `/resumes/`
 
 #### 이력서 목록 조회
 - **Method**: `GET`
-- **URL**: `/resumes/list`
+- **URL**: `/resumes/`
 
 #### 이력서 상세 조회
 - **Method**: `GET`
-- **URL**: `/resumes/:resumeId/detail`
+- **URL**: `/resumes/:resumeId`
 
 #### 이력서 수정
 - **Method**: `PATCH`
@@ -99,7 +99,7 @@
 
 #### 이력서 삭제
 - **Method**: `DELETE`
-- **URL**: `/resumes/:deleteId/resume`
+- **URL**: `/resumes/:resumeId/`
 
 #### 토큰 재발급
 - **Method**: `POST`
@@ -111,11 +111,11 @@
 
 #### 이력서 상태 관리
 - **Method**: `PATCH`
-- **URL**: `/resumes/resume/:resumeId/status`
+- **URL**: `/resumes/:resumeId/logs`
 
 #### 이력서 로그 조회
 - **Method**: `GET`
-- **URL**: `/resumes.resume/log/:resumeId`
+- **URL**: `/resumes/:resumeId/status`
 
 
 ### 참고 자료

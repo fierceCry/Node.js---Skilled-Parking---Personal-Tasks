@@ -53,7 +53,7 @@ userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req,
 /**  사용자 로그아웃 API **/
 userRouter.get('/logout', refreshTokenMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
-
+  console.log(id)
   const tokenRecord = await prisma.refreshToken.findFirst({
     where: { userId: id }
   });

@@ -34,7 +34,6 @@ const refreshTokenMiddleware = catchAsync(async (req, res, next) => {
     return res.status(400).json({ message: AUTH_MESSAGES.TOKEN_END });
   }
   const isValid = await bcrypt.compare(token, tokenData.refreshToken);
-
   if (!isValid) { 
     return res.status(401).json({ message: AUTH_MESSAGES.TOKEN_END });
   }
