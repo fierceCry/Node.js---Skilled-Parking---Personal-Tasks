@@ -11,23 +11,22 @@ const userRouter = express.Router();
 /** 사용자 정보 조회 API **/
 userRouter.get('/profile', authMiddleware, catchAsync(async (req, res) => {
     const user = req.user;
-    res.status(200).json({
+    res.status(200).json({data: {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-    });
+  }});
 }));
 
 /** 사용자 RefreshToken 토큰 재발급 API **/
 userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req, res)=>{
-  const { id, role } = req.user;
-
+  const { id } = req.user;
+  console.log(req.user)
   const accessToken = jwt.sign(
-    { id: id,
-      role: role
+    { id: id
      },
      ENV_KEY.SECRET_KEY,
     { expiresIn: ENV_KEY.JWT_EXPIRATION_TIME }
@@ -37,7 +36,7 @@ userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req,
   });
     // RefreshToken 생성
     const refreshToken = jwt.sign(
-      { id: id, role: role },
+      { id: id},
       ENV_KEY.REFRESH_SECRET_KEY,
       { expiresIn: ENV_KEY.REFRESH_TOKEN_EXPIRATION_TIME }
     );
@@ -48,11 +47,11 @@ userRouter.post('/token/refresh', refreshTokenMiddleware, catchAsync(async( req,
       data: {
         refreshToken: refreshToken
       }});
-    return  res.status(200).json({ accessToken, refreshToken})
+    return  res.status(200).json({ data: {accessToken, refreshToken}})
 }))
 
 /**  사용자 로그아웃 API **/
-userRouter.get('/logout', authMiddleware, catchAsync(async(req, res)=>{
+userRouter.get('/logout', refreshTokenMiddleware, catchAsync(async(req, res)=>{
   const { id } = req.user;
 
   const tokenRecord = await prisma.refreshToken.findFirst({

@@ -7,7 +7,6 @@ import { catchAsync } from './error-handler.middleware.js';
 /** accessToken 토큰 검증 API **/
 const authMiddleware = catchAsync(async (req, res, next) => {
     const accessToken = req.headers.authorization;
-    console.log(accessToken)
     if (!accessToken) {
       return res.status(400).json({ message: AUTH_MESSAGES.NO_AUTH_INFO });
     }
